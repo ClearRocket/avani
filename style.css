@@ -1,0 +1,59 @@
+#feedback {
+  font-size: 40px;      /* make text bigger */
+  font-weight: 600;     /* optional: bold it */
+  color: #ff4f9a;       /* optional: match the theme */
+  transition: opacity 0.3s ease;
+}
+.ending-screen {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: visible; /* so images can stick out */
+}
+
+.ending-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 24px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+.calender-img {
+  position: absolute;      /* relative to viewport */
+  bottom: 2;            /* flush to bottom */
+  right: 0;             /* flush to right edge */
+  width: 3020px;         /* size */
+  height: 300px;
+  z-index: 2;           /* behind card */
+}
+.middle-cat-img {
+  position: fixed;      /* relative to viewport */
+  top: 12%;             /* vertical center */
+  left: 50%;            /* horizontal center */
+  width: 370px;         /* size */
+  height: 320px;
+  transform: translate(-50%, -50%); /* perfect centering */
+  z-index: 1;           /* behind card */
+}
+.ending-bg-img {
+  position: fixed;      /* relative to viewport */
+  top: 50%;             /* vertical center */
+  width: 800px;         /* bigger */
+  height: 800px;
+  transform: translateY(-50%); /* vertical centering only */
+  z-index: 1;           /* behind card */
+}
+
+.ending-bg-img.left {
+  left: 0;              /* flush to left edge */
+}
+
+.ending-bg-img.right {
+  right: 0;             /* flush to right edge */
+}
+
