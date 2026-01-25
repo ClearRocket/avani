@@ -1,1 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hmm are you Avani? 💗</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #ffd6e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 214, 232, 0.35);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .overlay-content {
+      background: white;
+      padding: 32px 48px;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .overlay-content h1 {
+      color: #ff4f9a;
+      margin-bottom: 12px;
+    }
+
+    #timer {
+      font-size: 48px;
+      font-weight: 600;
+      color: #ff4f9a;
+    }
+
+    #app {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .card, .screen {
+      background: #fff;
+      padding: 40px;
+      border-radius: 24px;
+      width: 420px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      animation: popIn 0.6s ease;
+    }
+
+    h1 {
+      color: #ff4f9a;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    label {
+      font-size: 14px;
+      color: #888;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border-radius: 12px;
+      border: 2px solid #eee;
+      font-size: 16px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .error input {
+      border-color: #ff4f4f;
+      background: #fff0f0;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 10px;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      background: #ff9ac7;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #ff4f9a;
+      transform: translateY(-2px);
+    }
+      .invite-screen {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    }
+
+    .left-half, .right-half {
+      flex: 1; /* half width each */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .left-half .half-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .right-half {
+      background: #fff3f7; /* light pink */
+      flex-direction: column;
+    }
+
+    .invite-card {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 24px;
+      width: 80%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .invite-card h1 {
+      color: #ff4f9a;
+      margin-bottom: 24px;
+      font-size: 36px;
+    }
+
+    .calendar-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      background: #ff9ac7;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .calendar-btn:hover {
+      background: #ff4f9a;
+    }
+
+    .calendar-img {
+    width: 150px;
+    height: auto;
+    margin-top: 16px;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="overlay">
+  <div class="overlay-content">
+    <h1>Hmmm are u a dumdum orr just not Avani</h1>
+    <div id="timer">25</div>
+  </div>
+</div>
+
+<div id="app"></div>
+
+<script>
+  let stage = 1;
+  let savedFirst = "";
+  let savedLast = "";
+
+  let currentQuestionIndex = 0;
+  let timerActive = false;
+  let timeLeft = 25;
+  let timerInterval = null;
+
+  const questions = [
+    {
+      text: "What’s the opposite of the best answer to this question if it was opposite day and this whole statement is false: What’s your favorite animal?",
+      answers: ["Spider", "Cat", "Pigeon", "Camel"],
+      correctIndex: 1
+    },
+    {
+      text:"What is Avani's favorite movie?",
+      answers:["The Notebook","Avatar","Titanic","Good Will Hunting"],
+      correctIndex: [0,1,3],
+    },
+    {
+     text: 'From One Fish Two Fish Red Fish Blue Fish, what comes after "Some are thin. Some are fat. The fat one has a _______."?',
+     answers: ["real nice cat.", "nice bum.", "yellow hat.", "purple car"],
+     correctIndex: 2
+
+    },
+    {
+      text:"Which one is the correct anagram of your and your meowmeows names combined?",
+      answers:["aynaivila","lyavainan","avinilyaav","anvililya"],
+      correctIndex: 0
+    },
+    {
+      text:"In Ilyas room, what color are the fans of his pc?",
+      answers:["Red, Blue, Green","White, Blue, Purple","Pink, Blue, Yellow","Blue and Red"],
+      correctIndex: 2
+    },
+    {
+      text:"What is your favorite drink?",
+      answers:["Water","Cherry Coke","Tea","Coffee"],
+      correctIndex: 3
+    },
+    {
+      text:"Which of these places have you never been to with geeky?",
+      answers:["Bowling","Shower","School","Swimming"],
+      correctIndex: 3,
+    },
+    {
+      text:"What is your favorite number?",
+      answers:["7","69","99","3.14"],
+      correctIndex: [0,1], 
+    },
+    {
+      text:"What is your favorite cat?",
+      answers:["Pusheen","Hello Kitty","Miles","Simon"],
+      correctIndex:2,
+    },
+    {
+      text:"What is your favorite crushes name of all time?(Be careful..)",
+      answers:["Jared","Maddox","Brandon","Ilya"],
+      correctIndex: 3,
+      kickout: true
+    },
+    {
+      text:"How long have you been togheter hm?",
+      answers: ["5784 hours","234 days","21646003 seconds","52 weeks"],
+      correctIndex: 0,
+    },
+    {
+      text:"What does Ilya collect?",
+      answers:["Forks","Markers","Coins","All of the choices"],
+      correctIndex: 2,
+    },
+    {
+      text:"How many sports have you played?",
+      answers:["4","6","8","10"],
+      correctIndex: [1,2],
+    },
+    {      
+      text: "Where do you have a scar",
+      answers: ["My nose", "My toe!!", "My forehead!!", "My bum!!"],
+      correctIndex: 3,
+    }
+
+  ];
+  const finalQuestions = [
+    {
+      text: "Final Question 1: Who loves each other more?",
+      answers: ["Ilya", "Avani", "Both equally(but Ilya a bit more)", "Neither"],
+      correctIndex: [0,2],
+    },
+    {
+      text: "What do you most look forward to doing together in the future?",
+      answers: ["Sleeping toghether", "Traveling together", "Getting a cat together", "All of the above"],
+      correctIndex: 3,
+    },
+  ];
+
+ const app = document.getElementById("app");
+  const overlay = document.getElementById("overlay");
+  const timerDisplay = document.getElementById("timer");
+
+  renderNameScreen();
+
+  function renderNameScreen() {
+  app.innerHTML = `
+    <div class="card" id="intro">
+      <h1 id="title">What’s your name?</h1>
+      <div class="field" id="firstField">
+        <label id="firstLabel">First Name</label>
+        <input id="firstName">
+      </div>
+      <div class="field" id="lastField">
+        <label id="lastLabel">Last Name</label>
+        <input id="lastName">
+      </div>
+      <p id="nameHint" class="hint"></p>
+      <div class="hint">Press Enter 💗</div>
+    </div>
+  `;
+}
+
+
+  document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+
+  const first = document.getElementById("firstName");
+  const last = document.getElementById("lastName");
+  const hint = document.getElementById("nameHint"); // optional hint paragraph
+
+  if (!first || !last) return;
+
+  if (stage === 1) {
+
+    if (first.value.trim() === "Avani" && last.value.trim() === "Jit") {
+      document.getElementById("firstField").classList.add("error");
+      document.getElementById("lastField").classList.add("error");
+
+      document.getElementById("firstLabel").textContent = "Last Name";
+      document.getElementById("lastLabel").textContent = "First Name";
+      document.getElementById("title").textContent = "Are you sure?";
+
+      first.value = "";
+      last.value = "";
+      hint.innerText = ""; 
+      stage = 2;
+    } else {
+      hint.innerText = "Nope, you aren't the special person this was meant for. Try again 💖";
+      first.value = "";
+      last.value = "";
+    }
+
+  } else if (stage === 2) {
+    if (first.value.trim() === "Jit" && last.value.trim() === "Avani") {
+      renderVerificationTest();
+    } else {
+      hint.innerText = "Oops! That’s not quite right 💗 Try again!";
+      first.value = "";
+      last.value = ""; 
+      first.focus();  
+    }
+  }
+});
+
+function renderVerificationTest() {
+  app.innerHTML = `
+    <div class="card">
+      <h1>Hmmm… how do I know you are the real Avani?</h1>
+      <p>Let's do a quick test with questions only the real Avani would know hehehe</p>
+      <button id="Start">Start!</button>
+    </div>
+  `;
+
+  document.getElementById("Start").onclick = () => {
+    startQuiz(); 
+  };
+}
+
+
+
+  function startQuiz() {
+    app.innerHTML = `
+      <div class="screen">
+        <h1 id="questionText"></h1>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+    `;
+    currentQuestionIndex = 0;
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const q = questions[currentQuestionIndex];
+    document.getElementById("questionText").innerText = q.text;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    q.answers.forEach((answer, index) => {
+      const btn = document.createElement("button");
+      btn.innerText = answer;
+      btn.onclick = () => handleAnswer(index);
+      answersDiv.appendChild(btn);
+    });
+  }
+  function renderDialogueScreen() {
+    app.innerHTML = `
+      <div class="card">
+        <h1>Wowowow you might be the real Avani Jit 💖</h1>
+        <p>Ready for your final two questions?</p>
+        <button id="startFinal">Meow</button>
+      </div>
+    `;
+
+    document.getElementById("startFinal").onclick = () => {
+      renderFinalQuestions();
+    };
+  }
+
+ function handleAnswer(index) {
+    const q = currentQuestionIndex < questions.length ? questions[currentQuestionIndex] : finalQuestions[currentQuestionIndex - questions.length];
+    const feedback = document.getElementById("feedback");
+    const buttons = document.querySelectorAll("#answers button");
+    
+    buttons.forEach(btn => btn.disabled = true);
+
+    const correct = Array.isArray(q.correctIndex)
+      ? q.correctIndex.includes(index)
+      : index === q.correctIndex;
+
+    if (correct) {
+      feedback.style.opacity = "1";
+      feedback.innerText = "Correct 💗";
+
+      setTimeout(() => { feedback.style.opacity = "0"; }, 1000);
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+
+       
+        if (currentQuestionIndex === questions.length) {
+          renderDialogueScreen(); 
+        }
+        else if (currentQuestionIndex >= questions.length + finalQuestions.length) {
+          renderEndingScreen();
+        } else {
+          renderQuestion();
+        }
+      }, 800);
+
+    } else {
+      if (q.kickout) {
+        document.body.innerHTML = `
+          <div style="height:100vh;display:flex;justify-content:center;align-items:center;font-size:48px;color:#000;">
+            No.\n\n\n now you get to restart the quiz.
+          </div>
+        `;
+        history.pushState(null, '', location.href);
+        window.onpopstate = function () { history.go(1); };
+        return; 
+      }
+
+      startOverlayTimer();
+    }
+  }
+  function renderFinalQuestions() {
+    document.body.style.background = "url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzJ0YngzejB4bWR5eDNiZ2ZueGhtcGs5NjgxYzkwbjAwZjNiYjZyMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/auvPdJqCpMA4E/giphy.gif') no-repeat center center fixed";
+    document.body.style.backgroundSize = "cover";
+    app.innerHTML = `
+      <div class="screen">
+        <h1 id="questionText"></h1>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+    `;
+    renderQuestion(); 
+  }
+  function renderQuestion() {
+    let q;
+    if (currentQuestionIndex < questions.length) {
+      q = questions[currentQuestionIndex];
+      document.body.style.background = "#ffd6e8"; 
+    } else {
+      q = finalQuestions[currentQuestionIndex - questions.length];
+    }
+
+    document.getElementById("questionText").innerText = q.text;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    q.answers.forEach((answer, index) => {
+      const btn = document.createElement("button");
+      btn.innerText = answer;
+      btn.onclick = () => handleAnswer(index);
+      answersDiv.appendChild(btn);
+    });
+  }
+  function startOverlayTimer() {
+    if (timerActive) return;
+
+    timerActive = true;
+    timeLeft = 25;
+    overlay.classList.add("active");
+    timerDisplay.textContent = timeLeft;
+
+    const buttons = document.querySelectorAll("#answers button"); 
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        overlay.classList.remove("active");
+        timerActive = false;
+        buttons.forEach(btn => btn.disabled = false);
+      }
+    }, 1000);
+  }
+  function renderEndingScreen() {
+  document.body.style.background = "#ffd6e8"; 
+  app.innerHTML = `
+    <div class="ending-screen">
+      <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTVycTg5bG82ZzZyZ3kxemwxZml3Z2d1enUzM2V0YzVnNGRkMzFkcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/C8ih1zB9e9KJLySClx/giphy.gif" class="ending-bg-img left ">
+      <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTVycTg5bG82ZzZyZ3kxemwxZml3Z2d1enUzM2V0YzVnNGRkMzFkcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/C8ih1zB9e9KJLySClx/giphy.gif" class="ending-bg-img right">
+      <img src="https://petwellbeing.com/cdn/shop/articles/iStock-622923118.jpg?v=1706751615" class="middle-cat-img">
+      <div class="ending-card">
+        <h1>YIPPIE! YOUR IDENTITY HAS BEEN CONFIRMED HELLOOO MY LOVELY, GORGEOUS, AND PERFECT AVANI!!</h1>
+        <p>NOW LETS MOVE ON</p>
+        <button id="moveOn">YESS ITS ME AVANI I MEOW A LOT!!</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("moveOn").onclick = () => {
+
+  app.innerHTML = `
+    <div class="invite-screen">
+      <!-- Left image -->
+      <div class="left-half">
+        <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" alt="cute cat" class="half-bg">
+      </div>
+
+      <!-- Right text box -->
+      <div class="right-half">
+        <div class="invite-card">
+         <h1 style="font-size: 50px;">Are you free on Feb 1? 💖</h1>
+            <h2>YES? GREAT CLICK THE LINK MHM🎉</h2>
+          
+          <!-- Google Calendar invite -->
+          <a href="https://calendar.app.google/yzWGYpJ5GofjQAhr9"
+             target="_blank" class="calendar-btn">Add to Google Calendar</a>
+
+          <!-- Optional small calendar image -->
+          <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2d6MzR2ajNrajh3MGFkM3N0ZWJpeGUxZzQ0aXoyc3d6eHBmYTh3ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TMJvSJgWWen0RWVq9C/giphy.gif" class="calendar-img">
+        </div>
+      </div>
+    </div>
+  `;
+};
+}
+
+
+</script>
+
+
+</body>
+</html>
 
